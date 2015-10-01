@@ -9,8 +9,7 @@ RUN		apt-get update && apt-get install -y \
 			python-pip \
 			python2.7 \
 			ruby2.1-dev \
-			ruby2.1 && \
-		ln -s /usr/bin/nodejs /usr/bin/node
+			ruby2.1
 RUN		pip install pygments
 RUN		gem2.1 install jekyll
 RUN		mkdir /jekyll /jekyll/git_scratch && \
@@ -31,5 +30,5 @@ VOLUME		/var/www
 # Use USER to let the jekyll hook run as a non-root user
 USER		jekyll
 WORKDIR		/jekyll/jekyll-hook
-CMD		./jekyll-hook.js
+CMD		nodejs jekyll-hook.js
 EXPOSE		8080
