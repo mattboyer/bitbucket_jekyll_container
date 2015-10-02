@@ -5,30 +5,34 @@ RUN		apt-get update && apt-get install -y \
 			git \
 			make \
 			nodejs \
-			npm \
-			python-pip \
-			python2.7 \
-			ruby2.1-dev \
-			ruby2.1
-RUN		pip install pygments
+			python3 python3-dev python3-pip \
+			ruby2.1 ruby2.1-dev
+
+# Install the BitBucket webhook as well as GUnicorn
+RUN		pip3 install --upgrade pip && pip3 install pygments gunicorn bitbucket-jekyll-hook
+
+# Install Jekyll
 RUN		gem2.1 install jekyll
-RUN		mkdir /jekyll /jekyll/git_scratch && \
+
+# Set up a user for the webhook service
+RUN		mkdir /jekyll /jekyll/.ssh && \
 		groupadd -r jekyll && \
-		useradd -d /jekyll -g jekyll jekyll && \
-		cd /jekyll && \
-		git clone https://github.com/developmentseed/jekyll-hook.git && \
-		cd /jekyll/jekyll-hook && npm install && \
-		chown -R jekyll:jekyll /jekyll
+		useradd -d /jekyll -g jekyll jekyll
 
-COPY		config.json /jekyll/jekyll-hook/
+COPY		deployment_key/id* /jekyll/.ssh/
 
+COPY		bitbucket_host_key /jekyll/.ssh/known_hosts
+COPY		ssh_config /jekyll/.ssh/config
+COPY		gunicorn_config.py /jekyll/
+RUN		chown -R jekyll:jekyll /jekyll && chmod 0700 /jekyll/.ssh
 
-
+# Set up a directory for the site
 RUN		mkdir /var/www /var/www/static_site
 COPY		static_site/* /var/www/static_site/
+RUN		chown -R jekyll:jekyll /var/www
+
 VOLUME		/var/www
-# Use USER to let the jekyll hook run as a non-root user
 USER		jekyll
-WORKDIR		/jekyll/jekyll-hook
-CMD		nodejs jekyll-hook.js
-EXPOSE		8080
+WORKDIR		/jekyll
+CMD		env PUBLISH_DEST=/var/www/static_site PUBLISH_BRANCH=live gunicorn -c gunicorn_config.py BB_jekyll_hook.jekyll_hook:app
+EXPOSE		8000
