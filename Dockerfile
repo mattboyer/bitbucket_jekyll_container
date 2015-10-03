@@ -9,7 +9,10 @@ RUN		apt-get update && apt-get install -y \
 			ruby2.1 ruby2.1-dev
 
 # Install the BitBucket webhook as well as GUnicorn
-RUN		pip3 install --upgrade pip && pip3 install pygments gunicorn bitbucket-jekyll-hook
+RUN		pip3 install --upgrade pip && pip3 install \
+			pygments \
+			gunicorn \
+			bitbucket-jekyll-hook
 
 # Install Jekyll
 RUN		gem2.1 install jekyll
