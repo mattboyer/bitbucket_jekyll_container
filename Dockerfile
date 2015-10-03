@@ -1,18 +1,16 @@
 FROM		debian:jessie
 MAINTAINER	mboyer@sdf.org
 RUN		apt-get update && apt-get install -y \
-			gcc \
 			git \
-			make \
 			nodejs \
-			python3 python3-dev python3-pip \
+			python2.7 python2.7-dev python-pip \
 			ruby2.1 ruby2.1-dev
 
 # Install the BitBucket webhook as well as GUnicorn
-RUN		pip3 install --upgrade pip && pip3 install \
-			pygments \
+RUN		pip2 install --upgrade pip && pip2 install \
+			bitbucket-jekyll-hook \
 			gunicorn \
-			bitbucket-jekyll-hook
+			pygments
 
 # Install Jekyll
 RUN		gem2.1 install jekyll
